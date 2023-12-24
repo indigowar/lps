@@ -17,9 +17,21 @@ import (
 	"lps/internal/features/auth"
 	"lps/internal/features/dashboard"
 	"lps/internal/features/profile"
+	"lps/pkg/postgres"
 )
 
 func Run(cfg *config.Config) {
+	_, err := postgres.CreateClient(postgres.Credentials{
+		Host:     cfg.Db.Host,
+		Port:     cfg.Db.Port,
+		User:     cfg.Db.SystemUser,
+		Password: cfg.Db.SystemPassword,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
 
@@ -41,12 +53,21 @@ func Run(cfg *config.Config) {
 	e.GET("/auth/register/:login", authHandler.ServeRegisterPage("/auth/register"))
 	e.POST("/auth/register", authHandler.HandleRegisterRequest())
 
-	dashboardHandler := dashboard.NewHandler()
-	e.GET("/", dashboardHandler.ShowDashboard())
+	_ = dashboard.NewHandler()
+	// e.GET("/", dashboardHandler.ShowDashboard())
 
 	profileHandler := profile.NewHandler()
 	e.GET("/profile", profileHandler.GetProfile("/auth/login"))
 	e.PUT("/profile", profileHandler.ServeProfileRequst())
+
+	e.GET("/", func(c echo.Context) error {
+		sess, _ := session.Get("user-sesson", c)
+		_, exists := sess.Values["user-id"]
+		if !exists {
+			return c.HTML(http.StatusOK, "Not Logged In")
+		}
+		return c.HTML(http.StatusOK, "Logged In")
+	})
 
 	go func() {
 		if err := e.Start(":3000"); err != nil && err != http.ErrServerClosed {

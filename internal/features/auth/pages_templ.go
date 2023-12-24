@@ -237,7 +237,6 @@ func loginLoginOpts() form.TextFieldOpts {
 		Id:          "login__field",
 		Name:        "login",
 		Required:    true,
-		ReadOnly:    true,
 	}
 }
 
@@ -254,10 +253,10 @@ func loginPasswordOpts() form.TextFieldOpts {
 
 func loginFormOpts(handler string) form.FormOpts {
 	return form.FormOpts{
-		Label:      "Register",
-		Id:         "#regiter__form",
-		ButtonText: "Register",
-		Target:     "#register__result",
+		Label:      "Log In",
+		Id:         "#login__form",
+		ButtonText: "Log In",
+		Target:     "#login__form",
 		Swap:       "innerHTML",
 		Handler:    handler,
 	}

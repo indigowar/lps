@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${POSTGRES_HOST}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_SYSTEM_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_SYSTEM_PWD}
+
+      POSTGRES_ADMIN_NAME: ${POSTGRES_ADMIN_NAME}
+      POSTGRES_ADMIN_PWD: ${POSTGRES_ADMIN_PWD}
+      POSTGRES_STAFF_NAME: ${POSTGRES_STAFF_NAME}
+      POSTGRES_STAFF_PWD: ${POSTGRES_STAFF_PWD}
+      POSTGRES_HEAD_NAME: ${POSTGRES_HEAD_NAME}
+      POSTGRES_HEAD_PWD: ${POSTGRES_HEAD_PWD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ../cmd/db/:/docker-entrypoint-initdb.d/:Z
+      - ../.volumes/pgdata:/var/lib/postgresql/data:Z
+
+  lps:
+    build:
+      context: ./..
+      dockerfile: ./build/lps.dockerfile
+    depends_on:
+      - postgres
+    restart: always
+    ports:
+      - "${SYSTEM_PORT}:3000"
+    environment:
+      DB_HOST: ${POSTGRES_HOST}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_NAME: ${POSTGRES_DB}
+
+      POSTGRES_SYSTEM_NAME: ${POSTGRES_SYSTEM_USER}
+      POSTGRES_SYSTEM_PWD: ${POSTGRES_SYSTEM_PWD}
+
+      DB_ADMIN_NAME: ${POSTGRES_ADMIN_NAME}
+      DB_ADMIN_PWD: ${POSTGRES_ADMIN_PWD}
+      DB_STAFF_NAME: ${POSTGRES_STAFF_NAME}
+      DB_STAFF_PWD: ${POSTGRES_STAFF_PWD}
+      DB_HEAD_NAME: ${POSTGRES_HEAD_NAME}
+      DB_HEAD_PWD: ${POSTGRES_HEAD_PWD}

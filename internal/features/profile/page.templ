@@ -1,0 +1,24 @@
+package profile
+
+import "lps/pkg/templates/page"
+
+templ Page() {
+	@page.Wrapper(page.Header("LPS Profile")) {
+		<div>
+			@employeeInfo()
+			@accountInfo()
+		</div>
+	}
+}
+
+templ employeeInfo() {
+	<div>
+		<h1 class={ "title" }>Employee Info</h1>
+	</div>
+}
+
+templ accountInfo() {
+	<div>
+		<h1 class={ "title" }>Account Info</h1>
+	</div>
+}

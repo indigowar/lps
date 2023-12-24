@@ -1,0 +1,92 @@
+package auth
+
+import "lps/pkg/templates/page"
+import "lps/pkg/templates/form"
+
+templ registrationPage(handler string, login string) {
+	@page.Wrapper(page.Header("Login")) {
+		@form.Form(registerFormOpts(handler)) {
+			@form.TextField(registerLoginOpts(login))
+			@form.TextField(registerPasswordOpts())
+		}
+		<div id={ registerFormOpts(handler).Target[1:] } class={ "has-text-danger" }></div>
+	}
+}
+
+templ loginPage(handler string) {
+	@page.Wrapper(page.Header("Login")) {
+		@form.Form(loginFormOpts(handler)) {
+			@form.TextField(loginLoginOpts())
+			@form.TextField(loginPasswordOpts())
+		}
+		<div id={ loginFormOpts(handler).Target[1:] } class={ "has-text-danger" }></div>
+	}
+}
+
+func registerFormOpts(handler string) form.FormOpts {
+	return form.FormOpts{
+		Label:      "Register",
+		Id:         "#regiter__form",
+		ButtonText: "Register",
+		Target:     "#register__result",
+		Swap:       "innerHTML",
+		Handler:    handler,
+	}
+}
+
+func registerLoginOpts(value string) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Login:",
+		Placeholder: "Enter your login",
+		Id:          "login__field",
+		Name:        "login",
+		Required:    true,
+		ReadOnly:    true,
+
+		Value: value,
+	}
+}
+
+func registerPasswordOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Password:",
+		Placeholder: "Enter your password",
+		Type:        "password",
+		Id:          "pasword__field",
+		Name:        "password",
+		Required:    true,
+	}
+}
+
+func loginLoginOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Login:",
+		Placeholder: "Enter your login",
+		Id:          "login__field",
+		Name:        "login",
+		Required:    true,
+		ReadOnly:    true,
+	}
+}
+
+func loginPasswordOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Password:",
+		Placeholder: "Enter your password",
+		Type:        "password",
+		Id:          "pasword__field",
+		Name:        "password",
+		Required:    true,
+	}
+}
+
+func loginFormOpts(handler string) form.FormOpts {
+	return form.FormOpts{
+		Label:      "Register",
+		Id:         "#regiter__form",
+		ButtonText: "Register",
+		Target:     "#register__result",
+		Swap:       "innerHTML",
+		Handler:    handler,
+	}
+}

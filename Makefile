@@ -1,0 +1,6 @@
+gen:
+	templ generate ./...
+	go generate ./...
+
+run: gen
+	@go run cmd/lps/main.go

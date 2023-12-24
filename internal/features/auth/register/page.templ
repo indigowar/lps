@@ -1,0 +1,42 @@
+package register
+
+import "lps/pkg/templates/page"
+import "lps/pkg/templates/form"
+
+var (
+	loginOpts = form.TextFieldOpts{
+		Label:       "Login:",
+		Placeholder: "Enter your login",
+		Id:          "login__field",
+		Name:        "login",
+		Required:    true,
+		ReadOnly:    true,
+	}
+
+	passwordOpts = form.TextFieldOpts{
+		Label:       "Password:",
+		Placeholder: "Enter your password",
+		Type:        "password",
+		Id:          "pasword__field",
+		Name:        "password",
+		Required:    true,
+	}
+
+	formOpts = form.FormOpts{
+		Label:      "Register",
+		Id:         "#regiter__form",
+		ButtonText: "Register",
+		Target:     "#register__result",
+		Swap:       "innerHTML",
+	}
+)
+
+templ Page(handler string, login string) {
+	@page.Wrapper(page.Header("Login")) {
+		@form.Form(formOpts.WithHandler(handler)) {
+			@form.TextField(loginOpts.WithValue(login))
+			@form.TextField(passwordOpts)
+		}
+		<div id={ formOpts.Target[1:] } class={ "has-text-danger" }></div>
+	}
+}

@@ -1,0 +1,46 @@
+package form
+
+type TextFieldOpts struct {
+	Label       string
+	Type        string
+	Placeholder string
+	Id          string
+	Name        string
+	Value       string
+	Required    bool
+	ReadOnly    bool
+}
+
+func (opts TextFieldOpts) WithName(name string) TextFieldOpts {
+	opts.Name = name
+	return opts
+}
+
+func (opts TextFieldOpts) WithValue(value string) TextFieldOpts {
+	opts.Value = value
+	return opts
+}
+
+templ TextField(opts TextFieldOpts) {
+	<div class={ "field" }>
+		<label class={ "label" }>{ opts.Label }</label>
+		<div class={ "control" }>
+			<input
+ 				class={ "input" }
+ 				if opts.Type != "" {
+					type={ opts.Type }
+				}
+ 				name={ opts.Name }
+ 				placeholder={ opts.Placeholder }
+ 				id={ opts.Id }
+ 				value={ opts.Value }
+ 				if opts.Required {
+					required
+				}
+ 				if opts.ReadOnly {
+					readonly
+				}
+			/>
+		</div>
+	</div>
+}

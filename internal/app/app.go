@@ -21,13 +21,7 @@ import (
 )
 
 func Run(cfg *config.Config) {
-	_, err := postgres.CreateClient(postgres.Credentials{
-		Host:     cfg.Db.Host,
-		Port:     cfg.Db.Port,
-		User:     cfg.Db.SystemUser,
-		Password: cfg.Db.SystemPassword,
-	})
-
+	postgres, err := postgres.CreateConnection(cfg.Db.Host, cfg.Db.Port, cfg.Db.Db, cfg.Db.SystemUser, cfg.Db.SystemPassword)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +41,8 @@ func Run(cfg *config.Config) {
 		return c.HTML(http.StatusOK, "<h1>OK</h1>")
 	})
 
-	authHandler := auth.NewHandler(nil)
+	authService := auth.NewPostgresService(postgres)
+	authHandler := auth.NewHandler(authService)
 	e.GET("/auth/login", authHandler.ServeLoginPage("/auth/login"))
 	e.POST("/auth/login", authHandler.HandleLoginRequest())
 	e.GET("/auth/register/:login", authHandler.ServeRegisterPage("/auth/register"))
@@ -63,10 +58,10 @@ func Run(cfg *config.Config) {
 	e.GET("/", func(c echo.Context) error {
 		sess, _ := session.Get("user-sesson", c)
 		_, exists := sess.Values["user-id"]
-		if !exists {
-			return c.HTML(http.StatusOK, "Not Logged In")
+		if exists {
+			return c.HTML(http.StatusOK, "Logged In")
 		}
-		return c.HTML(http.StatusOK, "Logged In")
+		return c.HTML(http.StatusOK, "Not Logged In")
 	})
 
 	go func() {

@@ -31,15 +31,28 @@ func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 
 func (h *Handler) HandleLoginRequest() echo.HandlerFunc {
 	return func(c echo.Context) error {
+		currentSession, _ := session.Get("user-session", c)
+		_, exists := currentSession.Values["user-id"]
+		if exists {
+			return c.Redirect(http.StatusPermanentRedirect, "/")
+		}
+
 		login := c.FormValue("login")
 		password := c.FormValue("password")
 
 		log.Println("got: ", login, " and ", password)
 
-		// _, err := h.svc.Login(c.Request().Context(), login, password)
-		// if err != nil {
-		// 	return c.HTML(http.StatusOK, "<h2>Provided credentials are invalid</h2>")
-		// }
+		id, err := h.svc.Login(c.Request().Context(), login, password)
+		if err != nil {
+			return c.HTML(http.StatusOK, "<h2>Provided credentials are invalid</h2>")
+		}
+
+		currentSession.Values["user-id"] = id.String()
+		if err = currentSession.Save(c.Request(), c.Response().Writer); err != nil {
+			log.Println("FAILED TO SAVE THE FREAKING SESSION: ", err)
+		}
+
+		log.Println("CREATED AND EVERYTHING SHOULD FUCKING WORK")
 
 		c.Response().Header().Add("HX-Redirect", "/")
 		return c.HTML(http.StatusOK, "")

@@ -7,8 +7,6 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/gorilla/sessions"
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -35,7 +33,6 @@ func Run(cfg *config.Config) {
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"*"},
 	}))
-	e.Use(session.Middleware(sessions.NewCookieStore([]byte("secret"))))
 
 	e.GET("/status", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, "<h1>OK</h1>")
@@ -49,20 +46,10 @@ func Run(cfg *config.Config) {
 	e.POST("/auth/register", authHandler.HandleRegisterRequest())
 
 	_ = dashboard.NewHandler()
-	// e.GET("/", dashboardHandler.ShowDashboard())
 
 	profileHandler := profile.NewHandler()
 	e.GET("/profile", profileHandler.GetProfile("/auth/login"))
 	e.PUT("/profile", profileHandler.ServeProfileRequst())
-
-	e.GET("/", func(c echo.Context) error {
-		sess, _ := session.Get("user-sesson", c)
-		_, exists := sess.Values["user-id"]
-		if exists {
-			return c.HTML(http.StatusOK, "Logged In")
-		}
-		return c.HTML(http.StatusOK, "Not Logged In")
-	})
 
 	go func() {
 		if err := e.Start(":3000"); err != nil && err != http.ErrServerClosed {

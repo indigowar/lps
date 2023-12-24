@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,11 +17,12 @@ func NewHandler(svc Service) *Handler {
 
 func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		currentSession, _ := session.Get("user-session", c)
-		_, exists := currentSession.Values["user-id"]
-		if exists {
-			return c.Redirect(http.StatusPermanentRedirect, "/")
-		}
+		// currentSession, _ := session.Get("user-session", c)
+		// id, exists := currentSession.Values["user-id"]
+		// log.Println(id.(string))
+		// if exists {
+		// 	return c.Redirect(http.StatusPermanentRedirect, "/")
+		// }
 
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 		return loginPage(handler).Render(c.Request().Context(), c.Response().Writer)
@@ -31,41 +31,36 @@ func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 
 func (h *Handler) HandleLoginRequest() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		currentSession, _ := session.Get("user-session", c)
-		_, exists := currentSession.Values["user-id"]
-		if exists {
-			return c.Redirect(http.StatusPermanentRedirect, "/")
-		}
+		// currentSession, _ := session.Get("user-session", c)
+		// if _, exists := currentSession.Values["user-id"]; exists {
+		// 	log.Println("got logged in user")
+		// 	return c.Redirect(http.StatusPermanentRedirect, "/")
+		// }
 
 		login := c.FormValue("login")
 		password := c.FormValue("password")
 
-		log.Println("got: ", login, " and ", password)
-
-		id, err := h.svc.Login(c.Request().Context(), login, password)
+		_, err := h.svc.Login(c.Request().Context(), login, password)
 		if err != nil {
-			return c.HTML(http.StatusOK, "<h2>Provided credentials are invalid</h2>")
+			log.Printf("Failed to login, due to: %s\n", err)
+			return echo.NewHTTPError(http.StatusBadRequest, "credentials are invalid")
 		}
 
-		currentSession.Values["user-id"] = id.String()
-		if err = currentSession.Save(c.Request(), c.Response().Writer); err != nil {
-			log.Println("FAILED TO SAVE THE FREAKING SESSION: ", err)
-		}
-
-		log.Println("CREATED AND EVERYTHING SHOULD FUCKING WORK")
+		// currentSession.Values["user-id"] = id.String()
+		// _ = currentSession.Save(c.Request(), c.Response().Writer)
 
 		c.Response().Header().Add("HX-Redirect", "/")
-		return c.HTML(http.StatusOK, "")
+		return c.NoContent(http.StatusOK)
 	}
 }
 
 func (h *Handler) ServeRegisterPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		currentSession, _ := session.Get("user-session", c)
-		_, exists := currentSession.Values["user-id"]
-		if exists {
-			return c.Redirect(http.StatusPermanentRedirect, "/")
-		}
+		// currentSession, _ := session.Get("user-session", c)
+		// _, exists := currentSession.Values["user-id"]
+		// if exists {
+		// 	return c.Redirect(http.StatusPermanentRedirect, "/")
+		// }
 
 		login := c.Param("login")
 
@@ -82,5 +77,18 @@ func (h *Handler) HandleRegisterRequest() echo.HandlerFunc {
 		log.Println("Found: ", login, " and ", password)
 
 		return nil
+	}
+}
+
+func (h *Handler) HandleLogout() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// currentSession, _ := session.Get("user-session", c)
+
+		// if _, exists := currentSession.Values["user-id"]; !exists {
+		// 	return echo.NewHTTPError(http.StatusUnauthorized, "<h1>unauthorized</h1>")
+		// }
+		// delete(currentSession.Values, "user-id")
+		// currentSession.Save(c.Request(), c.Response().Writer)
+		return c.NoContent(http.StatusOK)
 	}
 }

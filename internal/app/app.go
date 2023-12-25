@@ -54,9 +54,11 @@ func Run(cfg *config.Config) {
 
 	_ = dashboard.NewHandler()
 
-	profileHandler := profile.NewHandler()
-	e.GET("/profile", profileHandler.GetProfile("/auth/login"))
-	e.PUT("/profile", profileHandler.ServeProfileRequst())
+	profileService := profile.NewPostgresService(postgres)
+	profileHandler := profile.NewHandler(profileService, sessionManager)
+	e.GET("/profile", profileHandler.GetProfile("/auth/login", "/profile/edit"))
+	e.PUT("/profile", profileHandler.ServeProfileRequest("/", "/profile"))
+	e.GET("/profile/edit", profileHandler.ServeUpdateForm("/profile", "/profile"))
 
 	e.GET("/", func(c echo.Context) error {
 		userId := sessionManager.GetString(c.Request().Context(), "user-id")

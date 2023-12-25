@@ -24,7 +24,7 @@ func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
 		if userId != "" {
-			return c.Redirect(http.StatusTemporaryRedirect, "/")
+			return c.Redirect(http.StatusSeeOther, "/")
 		}
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 		return loginPage(handler).Render(c.Request().Context(), c.Response().Writer)
@@ -58,7 +58,7 @@ func (h *Handler) ServeRegisterPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
 		if userId != "" {
-			c.Redirect(http.StatusTemporaryRedirect, "/")
+			c.Redirect(http.StatusSeeOther, "/")
 		}
 
 		login := c.Param("login")

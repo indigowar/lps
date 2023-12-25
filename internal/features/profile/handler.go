@@ -42,12 +42,12 @@ func (h *Handler) GetProfile(loginPage string, editAccontURL string, editEmploye
 	}
 }
 
-func (h *Handler) ServeProfileRequest(back string, onProfile string) echo.HandlerFunc {
+func (h *Handler) HandleAccountUpdate(onProfile string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := h.getId(c)
 		if err != nil {
 			if err.Error() == "empty" {
-				return c.Redirect(http.StatusSeeOther, back)
+				return c.Redirect(http.StatusSeeOther, onProfile)
 			}
 			return c.NoContent(http.StatusBadRequest)
 		}
@@ -59,16 +59,18 @@ func (h *Handler) ServeProfileRequest(back string, onProfile string) echo.Handle
 			log.Println("err: ", err)
 			return c.Redirect(http.StatusSeeOther, onProfile)
 		}
-		return c.Redirect(http.StatusSeeOther, onProfile)
+
+		c.Response().Header().Add("Hx-Redirect", onProfile)
+		return c.NoContent(http.StatusAccepted)
 	}
 }
 
-func (h *Handler) ServeAccountUpdate(saveHandler string, back string) echo.HandlerFunc {
+func (h *Handler) ServeAccountUpdateForm(saveHandler string, cancelHandler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := h.getId(c)
 		if err != nil {
 			if err.Error() == "empty" {
-				return c.Redirect(http.StatusSeeOther, back)
+				return c.Redirect(http.StatusSeeOther, cancelHandler)
 			}
 			return c.NoContent(http.StatusBadRequest)
 		}
@@ -78,13 +80,70 @@ func (h *Handler) ServeAccountUpdate(saveHandler string, back string) echo.Handl
 		}
 
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-		return editAccountInfo(info, saveHandler, back).Render(c.Request().Context(), c.Response().Writer)
+		return editAccountInfo(info, saveHandler, cancelHandler).Render(c.Request().Context(), c.Response().Writer)
 	}
 }
 
-func (h *Handler) ServeEmployeeUpdate(saveHandler string, back string) echo.HandlerFunc {
+func (h *Handler) ServeEmployeeUpdateForm(saveHandler string, handlerCancel string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return nil
+		id, err := h.getId(c)
+		if err != nil {
+			if err.Error() == "empty" {
+				return c.Redirect(http.StatusSeeOther, handlerCancel)
+			}
+			return c.NoContent(http.StatusBadRequest)
+		}
+		info, err := h.svc.GetUserInfo(c.Request().Context(), id)
+		if err != nil {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+		return editEmployeeInfo(info, saveHandler, handlerCancel).Render(c.Request().Context(), c.Response().Writer)
+	}
+}
+
+func (h *Handler) HandleEmployeeUpdate(onProfile string) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, err := h.getId(c)
+		if err != nil {
+			if err.Error() == "empty" {
+				return c.Redirect(http.StatusSeeOther, onProfile)
+			}
+			return c.Redirect(http.StatusSeeOther, onProfile)
+		}
+
+		surname := c.FormValue("surname")
+		name := c.FormValue("name")
+		phone_number := c.FormValue("phone_number")
+
+		var patronymic *string = nil
+		if c.FormValue("patronymic") != "" {
+			p := c.FormValue("patronymic")
+			patronymic = &p
+		}
+
+		if err := h.svc.UpdateEmployee(c.Request().Context(), id, surname, name, patronymic, phone_number); err != nil {
+			log.Println(err)
+			return c.Redirect(http.StatusBadRequest, onProfile)
+		}
+
+		c.Response().Header().Add("HX-Redirect", onProfile)
+		return c.NoContent(http.StatusAccepted)
+	}
+}
+
+func (h *Handler) HandleEditCancellation(onProfile string) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		_, err := h.getId(c)
+		if err != nil {
+			if err.Error() == "empty" {
+				return c.Redirect(http.StatusSeeOther, onProfile)
+			}
+			return c.Redirect(http.StatusSeeOther, onProfile)
+		}
+
+		c.Response().Header().Add("HX-Redirect", onProfile)
+		return c.NoContent(http.StatusAccepted)
 	}
 }
 

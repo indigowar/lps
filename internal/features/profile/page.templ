@@ -22,7 +22,7 @@ templ viewAccountInfo(info UserInfo, editURL string) {
 			<label>Password</label>
 			{ "**********" }
 		</div>
-		<button class={ "button", "button-is-primary" } hx-get={ editURL }></button>
+		<button class={ "button", "button-is-primary" } hx-get={ editURL }>Edit</button>
 	</div>
 }
 
@@ -37,11 +37,11 @@ templ viewEmloyeeInfo(info UserInfo, editURL string) {
 		<div><label>Position:</label>{ info.Postion }</div>
 		<div><label>Department:</label>{ info.Department }</div>
 		<div><label>Position:</label>{ info.PhoneNumber }</div>
-		<button class={ "button", "button-is-primary" } hx-get={ editURL }></button>
+		<button class={ "button", "button-is-primary" } hx-get={ editURL }>Edit</button>
 	</div>
 }
 
-templ editAccountInfo(info UserInfo, handlerSave string, handlerBack string) {
+templ editAccountInfo(info UserInfo, handlerSave string, handlerCancel string) {
 	<form hx-put={ handlerSave } hx-target="this" hx-swap="outerHTML">
 		<div>
 			<label>Login:</label>
@@ -56,13 +56,33 @@ templ editAccountInfo(info UserInfo, handlerSave string, handlerBack string) {
 			<input type="password" name="old_password"/>
 		</div>
 		<button class="button button-is-primary">Submit</button>
-		<button class="button button-is-primary" hx-get={ handlerBack }>Cancel</button>
+		<button class="button button-is-primary" hx-get={ handlerCancel }>Cancel</button>
 	</form>
 }
 
-templ editEmployeeInfo(info UserInfo, handlerSave string, handlerBack string) {
+templ editEmployeeInfo(info UserInfo, handlerSave string, handlerCancel string) {
 	<form hx-put={ handlerSave } hx-target="this" hx-swap="outerHTML">
+		<div class="form-group">
+			<label>Surname:</label>
+			<input type="text" name="surname" value={ info.Surname }/>
+		</div>
+		<div class="form-group">
+			<label>Name:</label>
+			<input type="text" name="name" value={ info.Name }/>
+		</div>
+		<div class="form-group">
+			<label>Patronymic:</label>
+			if info.Patronymic != nil {
+				<input type="text" name="patronymic" value={ *info.Patronymic }/>
+			} else {
+				<input type="text" name="patronymic" placeholder="You can enter patronymic"/>
+			}
+		</div>
+		<div class="form-group">
+			<label>Phone Number:</label>
+			<input type="tel" name="phone_number" value={ info.PhoneNumber }/>
+		</div>
 		<button class="button button-is-primary">Submit</button>
-		<button class="button button-is-primary" hx-get={ handlerBack }>Cancel</button>
+		<button class="button button-is-primary" hx-get={ handlerCancel }>Cancel</button>
 	</form>
 }

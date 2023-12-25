@@ -33,6 +33,10 @@ func (svc *postgresService) Login(ctx context.Context, login string, password st
 		return uuid.UUID{}, errors.New("error")
 	}
 
+	if len(uuidArray) == 0 {
+		return uuid.UUID{}, errors.New("user not found")
+	}
+
 	if len(uuidArray) > 0 {
 		id = uuidArray[0]
 	}

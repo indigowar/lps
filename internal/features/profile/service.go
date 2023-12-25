@@ -4,14 +4,26 @@ import (
 	"context"
 	"errors"
 	"log"
-	"lps/internal/domain"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
+type UserInfo struct {
+	ID          uuid.UUID
+	Surname     string
+	Name        string
+	Patronymic  *string
+	PhoneNumber string
+	Postion     string
+	Department  string
+	Login       string
+	Password    string
+	Activated   bool
+}
+
 type Service interface {
-	GetUserInfo(ctx context.Context, id uuid.UUID) (domain.Account, domain.Employee, error)
+	GetUserInfo(ctx context.Context, id uuid.UUID) (UserInfo, error)
 
 	UpdateAccountLogin(ctx context.Context, id uuid.UUID, password string, login string) error
 	UpdateAccountPassword(ctx context.Context, id uuid.UUID, oldPassword string, newPassword string) error
@@ -24,26 +36,24 @@ type postgresService struct {
 }
 
 // GetUserInfo implements Service.
-func (svc *postgresService) GetUserInfo(ctx context.Context, id uuid.UUID) (domain.Account, domain.Employee, error) {
-	var e domain.Employee
-	var a domain.Account
+func (svc *postgresService) GetUserInfo(ctx context.Context, id uuid.UUID) (UserInfo, error) {
+	var d UserInfo
 
 	query := `
 		SELECT
-			s.id, s.surname, s.name, s.patronymic,
-			s.phone_number, s.position, s.department,
-			a.login, a.password, a.activated, a.employee
-		FROM staff s
-		LEFT JOIN accounts a ON s.id = a.employee
-		WHERE s.id = $1
+			id, surname, name, patronymic,
+			phone_number, position, department,
+			login, password, activated
+		FROM employee_details_view
+		WHERE id = $1	
 	`
 
-	err := svc.db.QueryRow(query, id).Scan(&e.ID, &e.Surname, &e.Name, &e.Patronymic, &e.PhoneNumber, &e.Position, &e.Department, &a.Login, &a.Password, &a.IsActivated, &a.Employee)
+	err := svc.db.QueryRow(query, id).Scan(&d.ID, &d.Surname, &d.Name, &d.Patronymic, &d.PhoneNumber, &d.Postion, &d.Department, &d.Login, &d.Password, &d.Activated)
 	if err != nil {
 		log.Println(err)
-		return domain.Account{}, domain.Employee{}, errors.New("failed to load user info")
+		return UserInfo{}, errors.New("failed to retrieve info about user")
 	}
-	return a, e, nil
+	return d, nil
 }
 
 // UpdateAccountLogin implements Service.

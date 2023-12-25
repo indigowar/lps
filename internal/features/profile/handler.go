@@ -1,6 +1,7 @@
 package profile
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -21,35 +22,33 @@ func NewHandler(svc Service, sm *scs.SessionManager) Handler {
 	}
 }
 
-func (h *Handler) GetProfile(loginPage string, editFormUrl string) echo.HandlerFunc {
+func (h *Handler) GetProfile(loginPage string, editAccontURL string, editEmployeeURL string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
-		if userId == "" {
-			return c.Redirect(http.StatusSeeOther, loginPage)
-		}
-		id, err := uuid.Parse(userId)
+		id, err := h.getId(c)
 		if err != nil {
+			if err.Error() == "empty" {
+				return c.Redirect(http.StatusSeeOther, loginPage)
+			}
 			return c.NoContent(http.StatusBadRequest)
 		}
 
-		accountInfo, _, err := h.svc.GetUserInfo(c.Request().Context(), id)
+		userInfo, err := h.svc.GetUserInfo(c.Request().Context(), id)
 		if err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-		return Page(accountInfo, editFormUrl).Render(c.Request().Context(), c.Response().Writer)
+		return profilePage(userInfo, editAccontURL, editEmployeeURL).Render(c.Request().Context(), c.Response().Writer)
 	}
 }
 
 func (h *Handler) ServeProfileRequest(back string, onProfile string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
-		if userId == "" {
-			return c.Redirect(http.StatusSeeOther, back)
-		}
-		id, err := uuid.Parse(userId)
+		id, err := h.getId(c)
 		if err != nil {
+			if err.Error() == "empty" {
+				return c.Redirect(http.StatusSeeOther, back)
+			}
 			return c.NoContent(http.StatusBadRequest)
 		}
 
@@ -64,22 +63,39 @@ func (h *Handler) ServeProfileRequest(back string, onProfile string) echo.Handle
 	}
 }
 
-func (h *Handler) ServeUpdateForm(saveHandler string, back string) echo.HandlerFunc {
+func (h *Handler) ServeAccountUpdate(saveHandler string, back string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
-		if userId == "" {
-			return c.Redirect(http.StatusSeeOther, back)
-		}
-		id, err := uuid.Parse(userId)
+		id, err := h.getId(c)
 		if err != nil {
+			if err.Error() == "empty" {
+				return c.Redirect(http.StatusSeeOther, back)
+			}
 			return c.NoContent(http.StatusBadRequest)
 		}
-		accountInfo, _, err := h.svc.GetUserInfo(c.Request().Context(), id)
+		info, err := h.svc.GetUserInfo(c.Request().Context(), id)
 		if err != nil {
 			return c.NoContent(http.StatusBadRequest)
 		}
 
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-		return editAccountInfo(accountInfo, saveHandler, back).Render(c.Request().Context(), c.Response().Writer)
+		return editAccountInfo(info, saveHandler, back).Render(c.Request().Context(), c.Response().Writer)
 	}
+}
+
+func (h *Handler) ServeEmployeeUpdate(saveHandler string, back string) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		return nil
+	}
+}
+
+func (h *Handler) getId(c echo.Context) (uuid.UUID, error) {
+	userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
+	if userId == "" {
+		return uuid.UUID{}, errors.New("empty")
+	}
+	id, err := uuid.Parse(userId)
+	if err != nil {
+		return uuid.UUID{}, errors.New("invalid")
+	}
+	return id, nil
 }

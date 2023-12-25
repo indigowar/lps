@@ -49,3 +49,22 @@ CREATE TABLE IF NOT EXISTS accounts(
         ON DELETE CASCADE
         NOT NULL UNIQUE
 );
+
+-- helping views
+CREATE OR REPLACE VIEW employee_details_view AS
+SELECT
+    s.id,
+    s.surname,
+    s.name,
+    s.patronymic,
+    s.phone_number,
+    p.title AS position,
+    d.name AS department,
+    a.login AS login,
+    a.password AS password,
+    a.activated AS activated 
+FROM staff s
+LEFT JOIN positions p ON s.position = p.id
+LEFT JOIN departments d ON s.department = d.id
+LEFT JOIN accounts a ON s.id = a.employee;
+

@@ -56,9 +56,9 @@ func Run(cfg *config.Config) {
 
 	profileService := profile.NewPostgresService(postgres)
 	profileHandler := profile.NewHandler(profileService, sessionManager)
-	e.GET("/profile", profileHandler.GetProfile("/auth/login", "/profile/edit"))
+	e.GET("/profile", profileHandler.GetProfile("/auth/login", "/profile/account", "/profile/employee"))
 	e.PUT("/profile", profileHandler.ServeProfileRequest("/", "/profile"))
-	e.GET("/profile/edit", profileHandler.ServeUpdateForm("/profile", "/profile"))
+	e.GET("/profile/account", profileHandler.ServeAccountUpdate("/profile", "/profile"))
 
 	e.GET("/", func(c echo.Context) error {
 		userId := sessionManager.GetString(c.Request().Context(), "user-id")

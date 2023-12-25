@@ -1,17 +1,17 @@
 package profile
 
 import "lps/pkg/templates/page"
-import "lps/internal/domain"
 
-templ Page(account domain.Account, accountEditFormURL string) {
+templ profilePage(info UserInfo, editAccountURL string, editEmployeeURL string) {
 	@page.Wrapper(page.Header("LPS Profile")) {
 		<div class={ "container", "mt-6", "is-max-desktop" }>
-			@viewAccountInfo(account, accountEditFormURL)
+			@viewAccountInfo(info, editAccountURL)
+			@viewEmloyeeInfo(info, editEmployeeURL)
 		</div>
 	}
 }
 
-templ viewAccountInfo(info domain.Account, editURL string) {
+templ viewAccountInfo(info UserInfo, editURL string) {
 	<div class={ "box" } hx-target="this" hx-swap="outerHTML">
 		<h2 class={ "title" }>Account Information:</h2>
 		<div>
@@ -26,7 +26,22 @@ templ viewAccountInfo(info domain.Account, editURL string) {
 	</div>
 }
 
-templ editAccountInfo(info domain.Account, handlerSave string, handlerBack string) {
+templ viewEmloyeeInfo(info UserInfo, editURL string) {
+	<div class={ "box" } hx-target="this" hx-swap="outerHTML">
+		<h2 class={ "title" }>Employee Information:</h2>
+		<div><label>Surname:</label> { info.Surname } </div>
+		<div><label>Name:</label>{ info.Name }</div>
+		if info.Patronymic != nil {
+			<div><label>Patronymic:</label>{ *info.Patronymic }</div>
+		}
+		<div><label>Position:</label>{ info.Postion }</div>
+		<div><label>Department:</label>{ info.Department }</div>
+		<div><label>Position:</label>{ info.PhoneNumber }</div>
+		<button class={ "button", "button-is-primary" } hx-get={ editURL }></button>
+	</div>
+}
+
+templ editAccountInfo(info UserInfo, handlerSave string, handlerBack string) {
 	<form hx-put={ handlerSave } hx-target="this" hx-swap="outerHTML">
 		<div>
 			<label>Login:</label>
@@ -40,6 +55,13 @@ templ editAccountInfo(info domain.Account, handlerSave string, handlerBack strin
 			<label>Old Password:</label>
 			<input type="password" name="old_password"/>
 		</div>
+		<button class="button button-is-primary">Submit</button>
+		<button class="button button-is-primary" hx-get={ handlerBack }>Cancel</button>
+	</form>
+}
+
+templ editEmployeeInfo(info UserInfo, handlerSave string, handlerBack string) {
+	<form hx-put={ handlerSave } hx-target="this" hx-swap="outerHTML">
 		<button class="button button-is-primary">Submit</button>
 		<button class="button button-is-primary" hx-get={ handlerBack }>Cancel</button>
 	</form>

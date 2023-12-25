@@ -22,7 +22,7 @@ type Employee struct {
 	ID          uuid.UUID
 	Surname     string
 	Name        string
-	Patronymic  string
+	Patronymic  *string
 	PhoneNumber string
 	Password    string
 	Position    uuid.UUID

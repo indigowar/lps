@@ -23,7 +23,7 @@ import (
 func Run(cfg *config.Config) {
 	// postgres, err := postgres.CreateConnection(cfg.Db.Host, cfg.Db.Port, cfg.Db.Db, cfg.Db.SystemUser, cfg.Db.SystemPassword)
 
-	postgres, err := postgres.CreateConnectionUsingURL(os.Getenv("URL"))
+	postgres, err := postgres.CreateConnectionUsingURL(os.Getenv("POSTGRES_URL"))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -2,14 +2,17 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	session "github.com/spazzymoto/echo-scs-session"
 
 	"lps/internal/config"
 	"lps/internal/features/auth"
@@ -24,6 +27,9 @@ func Run(cfg *config.Config) {
 		log.Fatal(err)
 	}
 
+	sessionManager := scs.New()
+	sessionManager.Lifetime = 24 * time.Hour
+
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
 
@@ -33,13 +39,14 @@ func Run(cfg *config.Config) {
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"*"},
 	}))
+	e.Use(session.LoadAndSave(sessionManager))
 
 	e.GET("/status", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, "<h1>OK</h1>")
 	})
 
 	authService := auth.NewPostgresService(postgres)
-	authHandler := auth.NewHandler(authService)
+	authHandler := auth.NewHandler(authService, sessionManager)
 	e.GET("/auth/login", authHandler.ServeLoginPage("/auth/login"))
 	e.POST("/auth/login", authHandler.HandleLoginRequest())
 	e.GET("/auth/register/:login", authHandler.ServeRegisterPage("/auth/register"))
@@ -50,6 +57,14 @@ func Run(cfg *config.Config) {
 	profileHandler := profile.NewHandler()
 	e.GET("/profile", profileHandler.GetProfile("/auth/login"))
 	e.PUT("/profile", profileHandler.ServeProfileRequst())
+
+	e.GET("/", func(c echo.Context) error {
+		userId := sessionManager.GetString(c.Request().Context(), "user-id")
+		if userId == "" {
+			return c.HTML(http.StatusOK, "<h2>Not Logged In</h2>")
+		}
+		return c.HTML(http.StatusOK, fmt.Sprintf("<h2>Logged in as %s</h2>", userId))
+	})
 
 	go func() {
 		if err := e.Start(":3000"); err != nil && err != http.ErrServerClosed {

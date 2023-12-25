@@ -4,25 +4,29 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
-	svc Service
+	svc            Service
+	sessionManager *scs.SessionManager
 }
 
-func NewHandler(svc Service) *Handler {
-	return &Handler{svc: svc}
+func NewHandler(svc Service, sessionManager *scs.SessionManager) *Handler {
+	return &Handler{
+		svc:            svc,
+		sessionManager: sessionManager,
+	}
 }
 
 func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// currentSession, _ := session.Get("user-session", c)
-		// id, exists := currentSession.Values["user-id"]
-		// log.Println(id.(string))
-		// if exists {
-		// 	return c.Redirect(http.StatusPermanentRedirect, "/")
-		// }
+		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
+		log.Println("USER ID IS ", userId)
+		if userId != "" {
+			return c.Redirect(http.StatusTemporaryRedirect, "/")
+		}
 
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 		return loginPage(handler).Render(c.Request().Context(), c.Response().Writer)
@@ -31,23 +35,21 @@ func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 
 func (h *Handler) HandleLoginRequest() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// currentSession, _ := session.Get("user-session", c)
-		// if _, exists := currentSession.Values["user-id"]; exists {
-		// 	log.Println("got logged in user")
-		// 	return c.Redirect(http.StatusPermanentRedirect, "/")
-		// }
+		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
+		if userId != "" {
+			return c.NoContent(http.StatusBadRequest)
+		}
 
 		login := c.FormValue("login")
 		password := c.FormValue("password")
 
-		_, err := h.svc.Login(c.Request().Context(), login, password)
+		id, err := h.svc.Login(c.Request().Context(), login, password)
 		if err != nil {
 			log.Printf("Failed to login, due to: %s\n", err)
 			return echo.NewHTTPError(http.StatusBadRequest, "credentials are invalid")
 		}
 
-		// currentSession.Values["user-id"] = id.String()
-		// _ = currentSession.Save(c.Request(), c.Response().Writer)
+		h.sessionManager.Put(c.Request().Context(), "user-id", id.String())
 
 		c.Response().Header().Add("HX-Redirect", "/")
 		return c.NoContent(http.StatusOK)

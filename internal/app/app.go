@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -52,8 +51,6 @@ func Run(cfg *config.Config) {
 	e.GET("/auth/register/:login", authHandler.ServeRegisterPage("/auth/register"))
 	e.POST("/auth/register", authHandler.HandleRegisterRequest())
 
-	_ = dashboard.NewHandler()
-
 	profileService := profile.NewPostgresService(postgres)
 	profileHandler := profile.NewHandler(profileService, sessionManager)
 	e.GET("/profile", profileHandler.GetProfile("/auth/login", "/profile/account", "/profile/employee"))
@@ -63,13 +60,16 @@ func Run(cfg *config.Config) {
 	e.PUT("/profile/employee", profileHandler.HandleEmployeeUpdate("/profile"))
 	e.GET("/profile/cancel", profileHandler.HandleEditCancellation("/profile"))
 
-	e.GET("/", func(c echo.Context) error {
-		userId := sessionManager.GetString(c.Request().Context(), "user-id")
-		if userId == "" {
-			return c.HTML(http.StatusOK, "<h2>Not Logged In</h2>")
-		}
-		return c.HTML(http.StatusOK, fmt.Sprintf("<h2>Logged in as %s</h2>", userId))
-	})
+	// e.GET("/", func(c echo.Context) error {
+	// 	userId := sessionManager.GetString(c.Request().Context(), "user-id")
+	// 	if userId == "" {
+	// 		return c.HTML(http.StatusOK, "<h2>Not Logged In</h2>")
+	// 	}
+	// 	return c.HTML(http.StatusOK, fmt.Sprintf("<h2>Logged in as %s</h2>", userId))
+	// })
+
+	dashboardHandler := dashboard.NewHandler(postgres)
+	e.GET("/", dashboardHandler.ShowDashboard())
 
 	go func() {
 		if err := e.Start(":3000"); err != nil && err != http.ErrServerClosed {

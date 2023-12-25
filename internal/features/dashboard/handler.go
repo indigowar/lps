@@ -1,13 +1,18 @@
 package dashboard
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct{}
+type Handler struct {
+	db *sqlx.DB
+}
 
-func NewHandler() Handler {
-	return Handler{}
+func NewHandler(db *sqlx.DB) Handler {
+	return Handler{
+		db: db,
+	}
 }
 
 func (h *Handler) ShowDashboard() echo.HandlerFunc {

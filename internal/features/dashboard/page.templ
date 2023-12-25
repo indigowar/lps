@@ -1,11 +1,42 @@
 package dashboard
 
 import "lps/pkg/templates/page"
+import "lps/internal/domain"
 
 templ Page() {
-	@page.Wrapper(page.Header("LPS")) {
+	@page.Wrapper(page.Header("Dashboard LPS")) {
 		<h1>
 			Hey
 		</h1>
 	}
+}
+
+templ adminDashboard() {
+	// tab - staff
+	// tab - incidents
+	// tab - development
+	// tab - departments
+	// tab - positions 
+}
+
+templ headDashboard() {
+	// tab - staff
+	// tab - incidents
+	// tab - development
+}
+
+templ staffDashboard() {
+	// tab - my development
+	// tab - my incidents
+}
+
+type incidentsOpts struct {
+	ShowID       bool // false - hides the IDs
+	ShowEmployee bool // false - hides the user, shows only other fields
+	CanDelete    bool // true - a button for deletion will appear
+	CanEdit      bool // true - a button for editing this incident will appear
+	IsTableItem  bool // true - the items will be separated by table item in html
+}
+
+templ tableIncidents(opts incidentsOpts, data []domain.Incident) {
 }

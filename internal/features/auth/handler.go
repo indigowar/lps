@@ -23,11 +23,9 @@ func NewHandler(svc Service, sessionManager *scs.SessionManager) *Handler {
 func (h *Handler) ServeLoginPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
-		log.Println("USER ID IS ", userId)
 		if userId != "" {
 			return c.Redirect(http.StatusTemporaryRedirect, "/")
 		}
-
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 		return loginPage(handler).Render(c.Request().Context(), c.Response().Writer)
 	}
@@ -58,11 +56,10 @@ func (h *Handler) HandleLoginRequest() echo.HandlerFunc {
 
 func (h *Handler) ServeRegisterPage(handler string) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// currentSession, _ := session.Get("user-session", c)
-		// _, exists := currentSession.Values["user-id"]
-		// if exists {
-		// 	return c.Redirect(http.StatusPermanentRedirect, "/")
-		// }
+		userId := h.sessionManager.GetString(c.Request().Context(), "user-id")
+		if userId != "" {
+			c.Redirect(http.StatusTemporaryRedirect, "/")
+		}
 
 		login := c.Param("login")
 
@@ -84,13 +81,10 @@ func (h *Handler) HandleRegisterRequest() echo.HandlerFunc {
 
 func (h *Handler) HandleLogout() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// currentSession, _ := session.Get("user-session", c)
-
-		// if _, exists := currentSession.Values["user-id"]; !exists {
-		// 	return echo.NewHTTPError(http.StatusUnauthorized, "<h1>unauthorized</h1>")
-		// }
-		// delete(currentSession.Values, "user-id")
-		// currentSession.Save(c.Request(), c.Response().Writer)
+		if h.sessionManager.GetString(c.Request().Context(), "user-id") == "" {
+			return c.NoContent(http.StatusBadRequest)
+		}
+		h.sessionManager.Remove(c.Request().Context(), "user-id")
 		return c.NoContent(http.StatusOK)
 	}
 }

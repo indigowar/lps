@@ -6,8 +6,16 @@ import "lps/internal/domain"
 templ adminDashboard() {
 	@page.Wrapper(page.Header("LPS Dashboard")) {
 		@page.NavigationBar()
-		<div class="container box">
-			admin
+		<div class="container box is-max-desktop mt-6">
+			<div class="tabs is-centered">
+				<ul>
+					<li><button>Staff</button></li>
+					<li><button>Incidents</button></li>
+					<li><button>Developments</button></li>
+					<li><button>Departments</button></li>
+					<li><button>Positions</button></li>
+				</ul>
+			</div>
 		</div>
 	}
 	// tab - staff

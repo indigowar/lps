@@ -68,15 +68,8 @@ func Run(cfg *config.Config) {
 	e.PUT("/profile/employee", profileHandler.HandleEmployeeUpdate("/profile"))
 	e.GET("/profile/cancel", profileHandler.HandleEditCancellation("/profile"))
 
-	// e.GET("/", func(c echo.Context) error {
-	// 	userId := sessionManager.GetString(c.Request().Context(), "user-id")
-	// 	if userId == "" {
-	// 		return c.HTML(http.StatusOK, "<h2>Not Logged In</h2>")
-	// 	}
-	// 	return c.HTML(http.StatusOK, fmt.Sprintf("<h2>Logged in as %s</h2>", userId))
-	// })
-
-	dashboardHandler := dashboard.NewHandler(p)
+	dashboardService := dashboard.NewPostgrseService(p)
+	dashboardHandler := dashboard.NewHandler(dashboardService, sessionManager)
 	e.GET("/", dashboardHandler.ShowDashboard())
 
 	go func() {

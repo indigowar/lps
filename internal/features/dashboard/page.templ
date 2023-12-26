@@ -3,17 +3,13 @@ package dashboard
 import "lps/pkg/templates/page"
 import "lps/internal/domain"
 
-templ Page() {
-	@page.Wrapper(page.Header("Dashboard LPS")) {
-		@page.NavigationBar()
-
-		<h1>
-			Hey
-		</h1>
-	}
-}
-
 templ adminDashboard() {
+	@page.Wrapper(page.Header("LPS Dashboard")) {
+		@page.NavigationBar()
+		<div class="container box">
+			admin
+		</div>
+	}
 	// tab - staff
 	// tab - incidents
 	// tab - development
@@ -22,12 +18,24 @@ templ adminDashboard() {
 }
 
 templ headDashboard() {
+	@page.Wrapper(page.Header("LPS Dashboard")) {
+		@page.NavigationBar()
+		<div class="container box">
+			head
+		</div>
+	}
 	// tab - staff
 	// tab - incidents
 	// tab - development
 }
 
 templ staffDashboard() {
+	@page.Wrapper(page.Header("LPS Dashboard")) {
+		@page.NavigationBar()
+		<div class="container box">
+			staff
+		</div>
+	}
 	// tab - my development
 	// tab - my incidents
 }

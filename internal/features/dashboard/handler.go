@@ -29,9 +29,9 @@ func (h *Handler) ShowDashboard() echo.HandlerFunc {
 		id, err := h.getId(c)
 		if err != nil {
 			if err.Error() == "empty" {
-				return utils.Handle404(c)
+				return c.Redirect(http.StatusSeeOther, "/auth/login")
 			}
-			return c.NoContent(http.StatusBadRequest)
+			return utils.Handle500(c)
 		}
 
 		role, err := h.svc.GetUserRole(c.Request().Context(), id)

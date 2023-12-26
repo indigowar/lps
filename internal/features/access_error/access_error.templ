@@ -1,0 +1,12 @@
+package access_error 
+
+import "lps/pkg/templates/page"
+
+templ AccessError() {
+	@page.Wrapper(page.Header("Access Denied")) {
+		<div class="container is-max-desktop has-text-centered box">
+			<h1>Access is denied for you</h1>
+			<a href="/">GO BACK</a>
+		</div>
+	}
+}

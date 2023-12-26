@@ -15,6 +15,7 @@ import (
 	session "github.com/spazzymoto/echo-scs-session"
 
 	"lps/internal/config"
+	access_error "lps/internal/features/access_error"
 	addworker "lps/internal/features/add_worker"
 	"lps/internal/features/auth"
 	"lps/internal/features/dashboard"
@@ -77,6 +78,11 @@ func Run(cfg *config.Config) {
 	addWorkerHandler := addworker.NewHandler(addWorkerService, sessionManager)
 	e.GET("/add-worker", addWorkerHandler.ServePage("/add-worker"))
 	e.POST("/add-worker", addWorkerHandler.HandleRequest())
+
+	e.GET("/denied", func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+		return access_error.AccessError().Render(c.Request().Context(), c.Response().Writer)
+	})
 
 	go func() {
 		if err := e.Start(":3000"); err != nil && err != http.ErrServerClosed {

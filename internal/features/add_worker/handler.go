@@ -28,7 +28,7 @@ func (h *Handler) ServePage(handlerURL string) echo.HandlerFunc {
 		id, err := h.getId(c)
 		if err != nil {
 			if err.Error() == "empty" {
-				return utils.Handle404(c)
+				return c.Redirect(http.StatusSeeOther, "/auth/login")
 			}
 			return c.NoContent(http.StatusBadRequest)
 		}
@@ -39,7 +39,7 @@ func (h *Handler) ServePage(handlerURL string) echo.HandlerFunc {
 			return utils.Handle500(c)
 		}
 		if !canPerfom {
-			return c.NoContent(http.StatusUnauthorized)
+			return c.Redirect(http.StatusSeeOther, "/denied")
 		}
 
 		deparments, err := h.svc.GetDepartments(c.Request().Context())
@@ -109,7 +109,7 @@ func (h *Handler) HandleRequest() echo.HandlerFunc {
 			log.Println(err)
 			return utils.Handle500(c)
 		}
-		return c.NoContent(http.StatusOK)
+		return c.Redirect(http.StatusAccepted, "/")
 	}
 }
 

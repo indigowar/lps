@@ -16,7 +16,7 @@ BEGIN
 
     SELECT id INTO v_position
     FROM positions
-    WHERE title = 'Administrator' AND max_per_department = 1;
+    WHERE level = 'admin';
 
     IF v_position IS NULL OR v_department IS NULL THEN
         RAISE EXCEPTION 'The department and/or the position for superuser do not exist';
@@ -32,4 +32,3 @@ BEGIN
     RETURN v_id;
 END;
 $$ LANGUAGE PLPGSQL;
-

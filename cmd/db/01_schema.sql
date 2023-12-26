@@ -4,10 +4,12 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+CREATE TYPE POSITION_LEVEL AS ENUM('admin', 'head', 'staff');
+
 CREATE TABLE IF NOT EXISTS positions(
     id UUID PRIMARY KEY DEFAULT uuid_generate_v1(),
     title VARCHAR(128) UNIQUE NOT NULL,
-    max_per_department INTEGER
+    level POSITION_LEVEL DEFAULT 'staff'
 );
 
 CREATE TABLE IF NOT EXISTS departments(

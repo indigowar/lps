@@ -15,6 +15,7 @@ import (
 	session "github.com/spazzymoto/echo-scs-session"
 
 	"lps/internal/config"
+	addworker "lps/internal/features/add_worker"
 	"lps/internal/features/auth"
 	"lps/internal/features/dashboard"
 	"lps/internal/features/profile"
@@ -71,6 +72,11 @@ func Run(cfg *config.Config) {
 	dashboardService := dashboard.NewPostgrseService(p)
 	dashboardHandler := dashboard.NewHandler(dashboardService, sessionManager)
 	e.GET("/", dashboardHandler.ShowDashboard())
+
+	addWorkerService := addworker.NewPostgresService(p)
+	addWorkerHandler := addworker.NewHandler(addWorkerService, sessionManager)
+	e.GET("/add-worker", addWorkerHandler.ServePage("/add-worker"))
+	e.POST("/add-worker", addWorkerHandler.HandleRequest())
 
 	go func() {
 		if err := e.Start(":3000"); err != nil && err != http.ErrServerClosed {

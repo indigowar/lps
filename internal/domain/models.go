@@ -30,9 +30,9 @@ type Employee struct {
 }
 
 type Position struct {
-	ID               uuid.UUID
-	Title            string
-	MaxPerDepartment uint
+	ID    uuid.UUID
+	Title string
+	Level string
 }
 
 type ProfessionalDevelopment struct {

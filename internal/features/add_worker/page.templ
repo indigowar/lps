@@ -1,0 +1,106 @@
+package addworker
+
+import "lps/pkg/templates/page"
+import "lps/pkg/templates/form"
+import "lps/internal/domain"
+
+func formOpts(handler string) form.FormOpts {
+	return form.FormOpts{
+		Label:      "Add New Employee",
+		Handler:    handler,
+		Id:         "#new_employe__form",
+		ButtonText: "Add",
+	}
+}
+
+func loginOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Login:",
+		Placeholder: "Enter the login...",
+		Id:          "login",
+		Name:        "login",
+		Required:    true,
+	}
+}
+
+func surnameOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Surname:",
+		Placeholder: "Enter the surname...",
+		Id:          "surname",
+		Name:        "surname",
+		Required:    true,
+	}
+}
+
+func nameOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Name:",
+		Placeholder: "Enter the name...",
+		Id:          "name",
+		Name:        "name",
+		Required:    true,
+	}
+}
+
+func patronymicOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:       "Patronymic",
+		Placeholder: "Enter the patronymic or leave empty...",
+		Id:          "patronymic",
+		Name:        "patronymic",
+	}
+}
+
+func phoneOpts() form.TextFieldOpts {
+	return form.TextFieldOpts{
+		Label:    "Phone Number:",
+		Type:     "tel",
+		Id:       "phone_number",
+		Name:     "phone_number",
+		Required: true,
+	}
+}
+
+func positionsOpts(positions []domain.Position) form.SelectorOpts {
+	options := make([]form.OptionOpts, len(positions))
+	for i, v := range positions {
+		options[i] = form.OptionOpts{Name: v.Title, Value: v.ID.String()}
+	}
+
+	return form.SelectorOpts{
+		Name:     "position",
+		Label:    "Position:",
+		HasEmpty: false,
+		Options:  options,
+	}
+}
+
+func departmentsOpts(departments []domain.Department) form.SelectorOpts {
+	options := make([]form.OptionOpts, len(departments))
+	for i, v := range departments {
+		options[i] = form.OptionOpts{Name: v.Name, Value: v.ID.String()}
+	}
+
+	return form.SelectorOpts{
+		Label:    "Department: ",
+		Name:     "department",
+		HasEmpty: false,
+		Options:  options,
+	}
+}
+
+templ addWorkerPage(handler string, positions []domain.Position, departments []domain.Department) {
+	@page.Wrapper(page.Header("Add New Employee")) {
+		@page.NavigationBar()
+		@form.Form(formOpts(handler)) {
+			@form.TextField(loginOpts())
+			@form.TextField(surnameOpts())
+			@form.TextField(nameOpts())
+			@form.TextField(patronymicOpts())
+			@form.TextField(phoneOpts())
+			@form.Selector(positionsOpts(positions))
+			@form.Selector(departmentsOpts(departments))
+		}
+	}
+}

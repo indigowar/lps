@@ -1,0 +1,27 @@
+package form
+
+type OptionOpts struct {
+	Value string
+	Name  string
+}
+
+type SelectorOpts struct {
+	Name     string
+	Label    string
+	HasEmpty bool
+	Options  []OptionOpts
+}
+
+templ Selector(opts SelectorOpts) {
+	<div class="field" name={ opts.Name }>
+		<label class="label">{ opts.Label }</label>
+		<select name={ opts.Name }>
+			if opts.HasEmpty {
+				<option value=""></option>
+			}
+			for _, item := range opts.Options {
+				<option value={ item.Value }>{ item.Name }</option>
+			}
+		</select>
+	</div>
+}

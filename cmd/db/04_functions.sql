@@ -32,3 +32,25 @@ BEGIN
     RETURN v_id;
 END;
 $$ LANGUAGE PLPGSQL;
+
+
+CREATE OR REPLACE FUNCTION create_worker(
+    p_login VARCHAR(255),
+    p_surname VARCHAR(64),
+    p_name VARCHAR(64),
+    p_patronymic VARCHAR(64),
+    p_phone VARCHAR(15),
+    p_position UUID,
+    p_department UUID
+) RETURNS VOID AS $$
+DECLARE
+    v_id UUID;
+BEGIN
+    INSERT INTO staff(surname, name, patronymic, phone_number, position, department) VALUES
+    (p_surname, p_name, p_patronymic, p_phone, p_position, p_department)
+    RETURNING id INTO v_id;
+
+    INSERT INTO accounts(login, employee)
+    VALUES (p_login, v_id);
+END;
+$$ LANGUAGE PLPGSQL;

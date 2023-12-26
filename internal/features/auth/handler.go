@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"context"
 	"log"
+	"lps/pkg/templates/utils"
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
@@ -63,6 +65,15 @@ func (h *Handler) ServeRegisterPage(handler string) echo.HandlerFunc {
 
 		login := c.Param("login")
 
+		unactivated, err := h.svc.HasUnactivatedUser(c.Request().Context(), login)
+		if err != nil {
+			log.Println(err)
+			return utils.Handle404(c)
+		}
+		if !unactivated {
+			return utils.Handle404(c)
+		}
+
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
 		return registrationPage(handler, login).Render(c.Request().Context(), c.Response().Writer)
 	}
@@ -73,9 +84,15 @@ func (h *Handler) HandleRegisterRequest() echo.HandlerFunc {
 		login := c.FormValue("login")
 		password := c.FormValue("password")
 
-		log.Println("Found: ", login, " and ", password)
+		_, err := h.svc.ActivateUser(context.Background(), login, password)
+		if err != nil {
+			log.Println(err)
+			return utils.Handle500(c)
+		}
 
-		return nil
+		// h.sessionManager.Put(c.Request().Context(), "user-id", id)
+		c.Response().Header().Add("HX-Redirect", "/")
+		return c.NoContent(http.StatusAccepted)
 	}
 }
 

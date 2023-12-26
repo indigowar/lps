@@ -54,3 +54,30 @@ BEGIN
     VALUES (p_login, v_id);
 END;
 $$ LANGUAGE PLPGSQL;
+
+CREATE OR REPLACE FUNCTION activate_account(p_login VARCHAR(255), p_password VARCHAR(1024))
+RETURNS UUID
+AS $$
+DECLARE
+    v_employee_id UUID;
+BEGIN
+    SELECT employee INTO v_employee_id
+    FROM accounts
+    WHERE login = p_login
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'User with login % not found', p_login;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM accounts WHERE login = p_login AND activated) THEN
+        RAISE EXCEPTION 'User with login % is already activated', p_login;
+    END IF;
+
+    UPDATE accounts
+    SET password = p_password, activated = TRUE
+    WHERE login = p_login;
+
+    RETURN v_employee_id;
+END;
+$$ LANGUAGE plpgsql;

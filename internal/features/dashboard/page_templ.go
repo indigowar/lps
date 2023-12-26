@@ -32,7 +32,11 @@ func Page() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>")
+			templ_7745c5c3_Err = page.NavigationBar().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <h1>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -122,10 +126,11 @@ func staffDashboard() templ.Component {
 }
 
 type incidentsOpts struct {
-	ShowID       bool
-	ShowEmployee bool
-	CanDelete    bool
-	CanEdit      bool
+	ShowID       bool // false - hides the IDs
+	ShowEmployee bool // false - hides the user, shows only other fields
+	CanDelete    bool // true - a button for deletion will appear
+	CanEdit      bool // true - a button for editing this incident will appear
+	IsTableItem  bool // true - the items will be separated by table item in html
 }
 
 func tableIncidents(opts incidentsOpts, data []domain.Incident) templ.Component {

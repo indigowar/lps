@@ -4,6 +4,9 @@ import "lps/pkg/templates/page"
 
 templ profilePage(info UserInfo, editAccountURL string, editEmployeeURL string) {
 	@page.Wrapper(page.Header("LPS Profile")) {
+
+		@page.NavigationBar()
+
 		<div class={ "container", "mt-6", "is-max-desktop" }>
 			@viewAccountInfo(info, editAccountURL)
 			@viewEmloyeeInfo(info, editEmployeeURL)

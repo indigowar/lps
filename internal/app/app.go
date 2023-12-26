@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
@@ -21,9 +22,13 @@ import (
 )
 
 func Run(cfg *config.Config) {
-	// postgres, err := postgres.CreateConnection(cfg.Db.Host, cfg.Db.Port, cfg.Db.Db, cfg.Db.SystemUser, cfg.Db.SystemPassword)
-
-	postgres, err := postgres.CreateConnectionUsingURL(os.Getenv("POSTGRES_URL"))
+	var p *sqlx.DB
+	var err error
+	if os.Getenv("POSTGRES_URL") != "" {
+		p, err = postgres.CreateConnectionUsingURL(os.Getenv("POSTGRES_URL"))
+	} else {
+		p, err = postgres.CreateConnection(cfg.Db.Host, cfg.Db.Port, cfg.Db.Db, cfg.Db.SystemUser, cfg.Db.SystemPassword)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,14 +51,14 @@ func Run(cfg *config.Config) {
 		return c.HTML(http.StatusOK, "<h1>OK</h1>")
 	})
 
-	authService := auth.NewPostgresService(postgres)
+	authService := auth.NewPostgresService(p)
 	authHandler := auth.NewHandler(authService, sessionManager)
 	e.GET("/auth/login", authHandler.ServeLoginPage("/auth/login"))
 	e.POST("/auth/login", authHandler.HandleLoginRequest())
 	e.GET("/auth/register/:login", authHandler.ServeRegisterPage("/auth/register"))
 	e.POST("/auth/register", authHandler.HandleRegisterRequest())
 
-	profileService := profile.NewPostgresService(postgres)
+	profileService := profile.NewPostgresService(p)
 	profileHandler := profile.NewHandler(profileService, sessionManager)
 	e.GET("/profile", profileHandler.GetProfile("/auth/login", "/profile/account", "/profile/employee"))
 	e.GET("/profile/account", profileHandler.ServeAccountUpdateForm("/profile/account", "/profile/cancel"))
@@ -70,7 +75,7 @@ func Run(cfg *config.Config) {
 	// 	return c.HTML(http.StatusOK, fmt.Sprintf("<h2>Logged in as %s</h2>", userId))
 	// })
 
-	dashboardHandler := dashboard.NewHandler(postgres)
+	dashboardHandler := dashboard.NewHandler(p)
 	e.GET("/", dashboardHandler.ShowDashboard())
 
 	go func() {

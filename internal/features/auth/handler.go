@@ -85,6 +85,6 @@ func (h *Handler) HandleLogout() echo.HandlerFunc {
 			return c.NoContent(http.StatusBadRequest)
 		}
 		h.sessionManager.Remove(c.Request().Context(), "user-id")
-		return c.NoContent(http.StatusOK)
+		return c.Redirect(http.StatusSeeOther, "/")
 	}
 }

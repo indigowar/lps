@@ -57,6 +57,7 @@ func Run(cfg *config.Config) {
 	e.POST("/auth/login", authHandler.HandleLoginRequest())
 	e.GET("/auth/register/:login", authHandler.ServeRegisterPage("/auth/register"))
 	e.POST("/auth/register", authHandler.HandleRegisterRequest())
+	e.GET("/auth/logout", authHandler.HandleLogout())
 
 	profileService := profile.NewPostgresService(p)
 	profileHandler := profile.NewHandler(profileService, sessionManager)

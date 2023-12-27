@@ -1,0 +1,120 @@
+package positions
+
+import "lps/internal/domain"
+import "fmt"
+import "lps/pkg/templates/form"
+import "github.com/google/uuid"
+
+templ Table(data []domain.Position) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Title</th>
+				<th>Level</th>
+				<th>Edit</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, v := range data {
+				@Item(v)
+			}
+		</tbody>
+	</table>
+}
+
+templ Item(v domain.Position) {
+	<tr>
+		<td>{ v.ID.String() }</td>
+		<td>{ v.Title }</td>
+		<td>{ v.Level }</td>
+		<td>
+			<button
+ 				class="button is-link"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-get={ fmt.Sprintf("/position/%s/edit", v.ID.String()) }
+			>
+				Edit
+			</button>
+		</td>
+		<td>
+			<button
+ 				class="button is-danger"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-delete={ "/position/" + v.ID.String() }
+			>
+				Delete
+			</button>
+		</td>
+	</tr>
+}
+
+templ Form(v domain.Position) {
+	<tr>
+		<form
+ 			hx-put={ "/position" }
+ 			hx-target="closest tr"
+ 			hx-swap="outerHTML"
+		>
+			<td>
+				@form.TextField(idOpts(v.ID))
+			</td>
+			<td>
+				@form.TextField(titleOpts(v.Title))
+			</td>
+			<td>
+				@form.Selector(levelOpts())
+			</td>
+			<td>
+				<button class="button is-primary" type="submit">Save</button>
+			</td>
+			<td>
+				<button
+ 					class="button is-link"
+ 					hx-target="closest tr"
+ 					hx-swap="outerHTML"
+ 					hx-get={ fmt.Sprintf("/position/%s", v.ID.String()) }
+				>
+					Cancel
+				</button>
+			</td>
+		</form>
+	</tr>
+}
+
+func idOpts(id uuid.UUID) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		NoLabel:  true,
+		Type:     "text",
+		Id:       "id",
+		Name:     "id",
+		Value:    id.String(),
+		Required: true,
+		ReadOnly: true,
+	}
+}
+func titleOpts(name string) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		NoLabel:  true,
+		Type:     "text",
+		Id:       "title",
+		Name:     "title",
+		Value:    name,
+		Required: true,
+	}
+}
+
+func levelOpts() form.SelectorOpts {
+	return form.SelectorOpts{
+		NoLabel: true,
+		Name:    "level",
+		Options: []form.OptionOpts{
+			{Value: "staff", Name: "staff"},
+			{Value: "admin", Name: "Admin"},
+			{Value: "head", Name: "Head"},
+		},
+	}
+}

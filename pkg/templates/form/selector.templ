@@ -6,6 +6,7 @@ type OptionOpts struct {
 }
 
 type SelectorOpts struct {
+	NoLabel  bool
 	Name     string
 	Label    string
 	HasEmpty bool
@@ -14,7 +15,9 @@ type SelectorOpts struct {
 
 templ Selector(opts SelectorOpts) {
 	<div class="field" name={ opts.Name }>
-		<label class="label">{ opts.Label }</label>
+		if !opts.NoLabel {
+			<label class="label">{ opts.Label }</label>
+		}
 		<select name={ opts.Name }>
 			if opts.HasEmpty {
 				<option value=""></option>

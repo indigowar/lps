@@ -19,7 +19,9 @@ import (
 	addworker "lps/internal/features/add_worker"
 	"lps/internal/features/auth"
 	"lps/internal/features/dashboard"
+	"lps/internal/features/dashboard/departments"
 	"lps/internal/features/profile"
+	postgresUsecases "lps/internal/repository/postgres"
 	"lps/pkg/postgres"
 )
 
@@ -73,6 +75,15 @@ func Run(cfg *config.Config) {
 	dashboardService := dashboard.NewPostgrseService(p)
 	dashboardHandler := dashboard.NewHandler(dashboardService, sessionManager)
 	e.GET("/", dashboardHandler.ShowDashboard())
+	e.GET("/position", dashboardHandler.ServePositionsTable())
+
+	departmentUseCase := postgresUsecases.NewDepartmentUsecase(p)
+	departmentHandler := departments.NewHandler(departmentUseCase)
+	e.GET("/department", departmentHandler.ServeTable())
+	e.GET("/department/:id", departmentHandler.ServeItem())
+	e.GET("/department/:id/edit", departmentHandler.ServeEdit())
+	e.PUT("/department", departmentHandler.HandleEdit())
+	e.DELETE("/department/:id", departmentHandler.Delete())
 
 	addWorkerService := addworker.NewPostgresService(p)
 	addWorkerHandler := addworker.NewHandler(addWorkerService, sessionManager)

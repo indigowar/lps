@@ -1,6 +1,7 @@
 package form
 
 type TextFieldOpts struct {
+	NoLabel     bool
 	Label       string
 	Type        string
 	Placeholder string
@@ -23,7 +24,9 @@ func (opts TextFieldOpts) WithValue(value string) TextFieldOpts {
 
 templ TextField(opts TextFieldOpts) {
 	<div class={ "field" }>
-		<label class={ "label" }>{ opts.Label }</label>
+		if !opts.NoLabel {
+			<label class={ "label" }>{ opts.Label }</label>
+		}
 		<div class={ "control" }>
 			<input
  				class={ "input" }

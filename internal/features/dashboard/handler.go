@@ -43,6 +43,17 @@ func (h *Handler) ShowDashboard() echo.HandlerFunc {
 	}
 }
 
+func (h *Handler) ServePositionsTable() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		positions, err := h.svc.GetPositions(c.Request().Context())
+		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+		if err != nil {
+			return utils.Handle500(c)
+		}
+		return tablePositions(positions).Render(c.Request().Context(), c.Response().Writer)
+	}
+}
+
 func (h *Handler) showDashboardForRole(c echo.Context, id uuid.UUID, role UserRole) error {
 	switch role {
 	case UserRoleAdmin:

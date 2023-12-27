@@ -9,12 +9,12 @@ templ adminDashboard() {
 		<div class="container box is-max-desktop mt-6">
 			<div class="tabs is-centered">
 				<ul>
-					<li><button>Staff</button></li>
-					<li><button>Incidents</button></li>
-					<li><button>Developments</button></li>
-					<li><button>Departments</button></li>
-					<li><button>Positions</button></li>
+					<li><button class="button is-link px-15" hx-get="/position" hx-target="#main_content" hx-swap="innerHTML">Positions</button></li>
+					<li><button class="button is-link px-15" hx-get="/department" hx-target="#main_content" hx-swap="innerHTML">Departments</button></li>
 				</ul>
+			</div>
+			<div id="main_content">
+				<h1 class="title">Choose the tab </h1>
 			</div>
 		</div>
 	}
@@ -48,13 +48,31 @@ templ staffDashboard() {
 	// tab - my incidents
 }
 
-type incidentsOpts struct {
-	ShowID       bool // false - hides the IDs
-	ShowEmployee bool // false - hides the user, shows only other fields
-	CanDelete    bool // true - a button for deletion will appear
-	CanEdit      bool // true - a button for editing this incident will appear
-	IsTableItem  bool // true - the items will be separated by table item in html
+templ tablePositions(data []domain.Position) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Title</th>
+				<th>Level</th>
+				<th>Edit</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, v := range data {
+				@positionItem(v)
+			}
+		</tbody>
+	</table>
 }
 
-templ tableIncidents(opts incidentsOpts, data []domain.Incident) {
+templ positionItem(v domain.Position) {
+	<tr>
+		<td>{ v.ID.String() }</td>
+		<td>{ v.Title }</td>
+		<td>{ v.Level }</td>
+		<td><button class="button is-link">Edit</button></td>
+		<td><button class="button is-danger">Delete</button></td>
+	</tr>
 }

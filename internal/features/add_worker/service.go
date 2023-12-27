@@ -38,7 +38,7 @@ func (svc *postgresService) CreateWorker(ctx context.Context, login string, surn
 
 // GetDepartments implements Service.
 func (svc *postgresService) GetDepartments(ctx context.Context) ([]domain.Department, error) {
-	return postgres.NewGetDepartmentsUseCase(svc.db).GetDepartments(ctx)
+	return postgres.NewDepartmentUsecase(svc.db).GetAll(ctx)
 }
 
 // GetPositions implements Service.

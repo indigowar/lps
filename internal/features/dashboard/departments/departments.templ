@@ -1,0 +1,104 @@
+package departments
+
+import "lps/internal/domain"
+import "lps/pkg/templates/form"
+import "github.com/google/uuid"
+import "fmt"
+
+templ TableDepartments(data []domain.Department) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Title</th>
+				<th>Edit</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, v := range data {
+				@ItemDepartment(v)
+			}
+		</tbody>
+	</table>
+}
+
+templ ItemDepartment(v domain.Department) {
+	<tr>
+		<td>{ v.ID.String() }</td>
+		<td>{ v.Name }</td>
+		<td>
+			<button
+ 				class="button is-link"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-get={ fmt.Sprintf("/department/%s/edit", v.ID.String()) }
+			>
+				Edit
+			</button>
+		</td>
+		<td>
+			<button
+ 				class="button is-danger"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-delete={ "/department/" + v.ID.String() }
+			>
+				Delete
+			</button>
+		</td>
+	</tr>
+}
+
+templ FormDepartment(v domain.Department) {
+	<tr>
+		<form
+ 			hx-put={ "/department" }
+ 			hx-target="closest tr"
+ 			hx-swap="outerHTML"
+		>
+			<td>
+				@form.TextField(idOpts(v.ID))
+			</td>
+			<td>
+				@form.TextField(nameOpts(v.Name))
+			</td>
+			<td>
+				<button class="button is-primary" type="submit">Save</button>
+			</td>
+			<td>
+				<button
+ 					class="button is-link"
+ 					hx-target="closest tr"
+ 					hx-swap="outerHTML"
+ 					hx-get={ fmt.Sprintf("/department/%s", v.ID.String()) }
+				>
+					Cancel
+				</button>
+			</td>
+		</form>
+	</tr>
+}
+
+func idOpts(id uuid.UUID) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		NoLabel:  true,
+		Type:     "text",
+		Id:       "id",
+		Name:     "id",
+		Value:    id.String(),
+		Required: true,
+		ReadOnly: true,
+	}
+}
+
+func nameOpts(name string) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		NoLabel:  true,
+		Type:     "text",
+		Id:       "name",
+		Name:     "name",
+		Value:    name,
+		Required: true,
+	}
+}

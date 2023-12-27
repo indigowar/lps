@@ -1,0 +1,41 @@
+package addincident
+
+import "github.com/google/uuid"
+import "lps/pkg/templates/form"
+import "lps/pkg/templates/page"
+
+templ formPage(id uuid.UUID) {
+	@page.Wrapper(page.Header("Add Incident")) {
+		@page.NavigationBar()
+		@form.Form(form.FormOpts{
+		Label:      "Incident",
+		Handler:    "/add-incident",
+		Id:         "#add_incident__form",
+		ButtonText: "Add",
+        }) {
+			@form.TextField(form.TextFieldOpts{
+        Label: "Who is guilty:",
+        Type:     "text",
+		Id:       "id",
+		Name:     "id",
+		Value:    id.String(),
+		Required: true,
+		ReadOnly: true,
+            })
+			@form.TextField(form.TextFieldOpts{
+                Label: "Description",
+                Type: "text",
+                Id: "description",
+                Name: "description",
+                Required: true,
+            })
+			@form.TextField(form.TextFieldOpts{
+                Label: "Date",
+                Type: "date",
+                Id: "date",
+                Name: "date",
+                Required: true,
+            })
+		}
+	}
+}

@@ -22,6 +22,7 @@ import (
 	"lps/internal/features/dashboard"
 	"lps/internal/features/dashboard/departments"
 	staff "lps/internal/features/dashboard/employee"
+	"lps/internal/features/dashboard/incidents"
 	"lps/internal/features/dashboard/positions"
 	"lps/internal/features/profile"
 	postgresUsecases "lps/internal/repository/postgres"
@@ -113,6 +114,14 @@ func Run(cfg *config.Config) {
 	addIncidentHandler := addincident.NewHandler(sessionManager, createIncidentUseCase)
 	e.GET("/add-incident", addIncidentHandler.ServePage())
 	e.POST("/add-incident", addIncidentHandler.HandleRequest())
+
+	incidentUseCase := postgresUsecases.NewIncidentUseCase(p)
+	incidentHandler := incidents.NewIncidentHandler(incidentUseCase)
+
+	e.GET("/incident", incidentHandler.ServeTable())
+	e.PUT("/incident/:id", incidentHandler.HandleEdit())
+	e.DELETE("/incident/:id", incidentHandler.Delete())
+	e.GET("/incident/:id/edit", incidentHandler.ServeEdit())
 
 	e.GET("/denied", func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)

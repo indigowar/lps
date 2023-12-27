@@ -46,5 +46,5 @@ type Incident struct {
 	ID          uuid.UUID
 	Employee    uuid.UUID
 	Description string
-	Date        time.Time
+	Date        time.Time `db:"happenning_date"`
 }

@@ -63,7 +63,7 @@ func adminDashboard() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></li><li><button class=\"button is-link px-15\" hx-get=\"/incidents\" hx-target=\"#main_content\" hx-swap=\"innerHTML\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></li><li><button class=\"button is-link px-15\" hx-get=\"/incident\" hx-target=\"#main_content\" hx-swap=\"innerHTML\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

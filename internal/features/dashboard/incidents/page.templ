@@ -1,0 +1,89 @@
+package incidents
+
+import "lps/internal/domain"
+import "fmt"
+import "lps/pkg/templates/form"
+
+templ Table(values []domain.Incident ) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Employee</th>
+				<th>Description</th>
+				<th>Date</th>
+				<th>Edit</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, v := range values {
+				@Item(v)
+			}
+		</tbody>
+	</table>
+}
+
+templ Item(v domain.Incident) {
+	<tr>
+		<td>{ v.ID.String() }</td>
+		<td>{ v.Employee.String() }</td>
+		<td>{ v.Description }</td>
+		<td>{ v.Date.String() }</td>
+		<td>
+			<button
+ 				class="button is-link"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-get={ fmt.Sprintf("/incident/%s/edit", v.ID.String()) }
+			>
+				Edit
+			</button>
+		</td>
+		<td>
+			<button
+ 				class="button is-danger"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-delete={ "/incident/" + v.ID.String() }
+			>
+				Delete
+			</button>
+		</td>
+	</tr>
+}
+
+templ Form(v domain.Incident) {
+	<tr>
+		<form
+ 			hx-put={ "/incident" }
+ 			hx-target="closest tr"
+ 			hx-swap="outerHTML"
+		>
+			<td>
+				@form.TextField(form.TextFieldOpts{
+				NoLabel: true,
+				Type: "text",
+				Id: "id",
+				Name: "id",
+				Value: v.ID.String(),
+				Required: true,
+				ReadOnly: true,
+			})
+			</td>
+			<td>
+				<button class="button is-primary" type="submit">Save</button>
+			</td>
+			<td>
+				<button
+ 					class="button is-link"
+ 					hx-target="closest tr"
+ 					hx-swap="outerHTML"
+ 					hx-get={ fmt.Sprintf("/incident/%s", v.ID.String()) }
+				>
+					Cancel
+				</button>
+			</td>
+		</form>
+	</tr>
+}

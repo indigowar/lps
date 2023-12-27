@@ -1,0 +1,200 @@
+package staff
+
+import "lps/internal/domain"
+import "lps/pkg/templates/form"
+import "github.com/google/uuid"
+import "fmt"
+
+templ Table(data []domain.Employee) {
+	<table class="table">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Surname</th>
+				<th>Name</th>
+				<th>Patronymic</th>
+				<th>Phone</th>
+				<th>Department</th>
+				<th>Position</th>
+				<th>Edit</th>
+				<th>Delete</th>
+			</tr>
+		</thead>
+		<tbody>
+			for _, v := range data {
+				@Item(v)
+			}
+		</tbody>
+	</table>
+}
+
+templ Item(v domain.Employee) {
+	<tr>
+		<td>{ v.ID.String() }</td>
+		<td>{ v.Surname }</td>
+		<td>{ v.Name }</td>
+		<td>
+			if v.Patronymic != nil {
+				{ *v.Patronymic }
+			} else {
+				{ "" }
+			}
+		</td>
+		<td>{ v.PhoneNumber }</td>
+		<td>{ v.Position.String() }</td>
+		<td>{ v.Department.String() }</td>
+		<td>
+			<button
+ 				class="button is-link"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-get={ fmt.Sprintf("/staff/%s/edit", v.ID.String()) }
+			>
+				Edit
+			</button>
+		</td>
+		<td>
+			<button
+ 				class="button is-danger"
+ 				hx-target="closest tr"
+ 				hx-swap="outerHTML"
+ 				hx-delete={ "/staff/" + v.ID.String() }
+			>
+				Delete
+			</button>
+		</td>
+	</tr>
+}
+
+templ Form(v domain.Employee, departments []domain.Department, positions []domain.Position) {
+	<tr>
+		<form
+ 			hx-put={ "/staff" }
+ 			hx-target="closest tr"
+ 			hx-swap="outerHTML"
+		>
+			<td>
+				@form.TextField(idOpts(v.ID))
+			</td>
+			<td>
+				@form.TextField(form.TextFieldOpts{
+					NoLabel: true,
+					Name: "surname",
+					Id: "surname",
+					Value: v.Surname,
+					Required: true,	
+				})
+			</td>
+			<td>
+				@form.TextField(form.TextFieldOpts{
+					NoLabel: true,
+					Name: "name",
+					Id: "name",
+					Value: v.Name,
+					Required: true,	
+				})
+			</td>
+			<td>
+				@form.TextField(patronymicOpts(v.Patronymic))
+			</td>
+			<td>
+				@form.TextField(form.TextFieldOpts{
+					NoLabel: true,
+					Name: "phone_number",
+					Id: "phone",
+					Type: "tel",
+					Value: v.PhoneNumber,
+					Required: true,	
+				})
+			</td>
+			<td>
+				@form.Selector(positionsOpts(positions))
+			</td>
+			<td>
+				@form.Selector(departmentsOpts(departments))
+			</td>
+			<td>
+				<button class="button is-primary" type="submit">Save</button>
+			</td>
+			<td>
+				<button
+ 					class="button is-link"
+ 					hx-target="closest tr"
+ 					hx-swap="outerHTML"
+ 					hx-get={ fmt.Sprintf("/staff/%s", v.ID.String()) }
+				>
+					Cancel
+				</button>
+			</td>
+		</form>
+	</tr>
+}
+
+func idOpts(id uuid.UUID) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		NoLabel:  true,
+		Type:     "text",
+		Id:       "id",
+		Name:     "id",
+		Value:    id.String(),
+		Required: true,
+		ReadOnly: true,
+	}
+}
+
+func nameOpts(name string) form.TextFieldOpts {
+	return form.TextFieldOpts{
+		NoLabel:  true,
+		Type:     "text",
+		Id:       "name",
+		Name:     "name",
+		Value:    name,
+		Required: true,
+	}
+}
+
+func patronymicOpts(p *string) form.TextFieldOpts {
+	if p == nil {
+		return form.TextFieldOpts{
+			NoLabel: true,
+			Name:    "patronymic",
+			Id:      "patronymic",
+			Value:   "",
+		}
+	}
+	return form.TextFieldOpts{
+		NoLabel: true,
+		Name:    "patronymic",
+		Id:      "patronymic",
+		Value:   *p,
+	}
+
+}
+
+func positionsOpts(positions []domain.Position) form.SelectorOpts {
+	options := make([]form.OptionOpts, len(positions))
+	for i, v := range positions {
+		options[i] = form.OptionOpts{Name: v.Title, Value: v.ID.String()}
+	}
+
+	return form.SelectorOpts{
+		Name:     "position",
+		Label:    "Position:",
+		HasEmpty: false,
+		Options:  options,
+	}
+}
+
+func departmentsOpts(departments []domain.Department) form.SelectorOpts {
+	options := make([]form.OptionOpts, len(departments))
+	for i, v := range departments {
+		options[i] = form.OptionOpts{Name: v.Name, Value: v.ID.String()}
+	}
+
+	return form.SelectorOpts{
+		Label:    "Department: ",
+		Name:     "department",
+		HasEmpty: false,
+		Options:  options,
+	}
+}

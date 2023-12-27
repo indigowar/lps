@@ -20,6 +20,7 @@ import (
 	"lps/internal/features/auth"
 	"lps/internal/features/dashboard"
 	"lps/internal/features/dashboard/departments"
+	staff "lps/internal/features/dashboard/employee"
 	"lps/internal/features/dashboard/positions"
 	"lps/internal/features/profile"
 	postgresUsecases "lps/internal/repository/postgres"
@@ -93,6 +94,14 @@ func Run(cfg *config.Config) {
 	e.GET("/position/:id/edit", positionHandler.ServeEdit())
 	e.PUT("/position", positionHandler.HandleEdit())
 	e.DELETE("/position/:id", positionHandler.Delete())
+
+	staffUseCase := postgresUsecases.NewEmployeeUseCase(p)
+	staffHandler := staff.NewHandler(staffUseCase, departmentUseCase, positionsUseCase)
+	e.GET("/staff", staffHandler.ServeTable())
+	e.GET("/staff/:id", staffHandler.ServeItem())
+	e.GET("/staff/:id/edit", staffHandler.ServeEdit())
+	e.PUT("/staff", staffHandler.HandleEdit())
+	e.DELETE("/staff/:id", staffHandler.Delete())
 
 	addWorkerService := addworker.NewPostgresService(p)
 	addWorkerHandler := addworker.NewHandler(addWorkerService, sessionManager)

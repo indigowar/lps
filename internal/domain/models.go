@@ -19,14 +19,13 @@ type Department struct {
 }
 
 type Employee struct {
-	ID          uuid.UUID
-	Surname     string
-	Name        string
-	Patronymic  *string
-	PhoneNumber string
-	Password    string
-	Position    uuid.UUID
-	Department  uuid.UUID
+	ID          uuid.UUID `db:"id"`
+	Surname     string    `db:"surname"`
+	Name        string    `db:"name"`
+	Patronymic  *string   `db:"patronymic"`
+	PhoneNumber string    `db:"phone_number"`
+	Position    uuid.UUID `db:"position"`
+	Department  uuid.UUID `db:"department"`
 }
 
 type Position struct {
